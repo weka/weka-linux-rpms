@@ -1,0 +1,11 @@
+# Weka.repo
+#
+
+[ofed]
+name=Ofed repo
+#mirrorlist=https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=BaseOS-$releasever
+#baseurl=http://dl.rockylinux.org/$contentdir/$releasever/BaseOS/$basearch/os/
+baseurl=https://weka-repo.s3.amazonaws.com/WekaLinux-8.10/ofed
+gpgcheck=0
+enabled=1
+countme=1

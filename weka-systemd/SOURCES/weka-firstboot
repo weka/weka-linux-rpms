@@ -1,0 +1,62 @@
+#!/usr/bin/bash
+
+# weka-firstboot - install weka on bootup of a new server, and configure misc items that can't be done in kickstart
+# working dir should be /opt/wekabits   (if put in /opt/weka, it would be removed with wekawhacker)
+logger WEKA Starting weka-firstboot
+
+# if a WSA, there will be a /.version file (WMS has a /.wms-version file)
+if [ -f /.version ]; then
+	# install weka
+	pushd /opt/weka-*
+	./install.sh &> /root/weka-install-log.txt
+	popd
+	VERSION=$(cat /.version)
+	MOTD="Welcome to the Weka Software Appliance!"
+	TYPE=wsa
+else
+	VERSION=$(cat /.wms-version)
+	MOTD="Welcome to the Weka Management Server!"
+	TYPE=wms
+fi
+
+### other weka installation items
+
+# configure firewall
+firewall-cmd --set-default-zone=public  # other options are set in the kickstart
+
+if [ "$TYPE" == "wms" ]; then
+	firewall-cmd --add-port 3000/tcp --add-port 8151/tcp --add-port 8090/tcp --add-port 443/tcp --add-port 80/tcp --permanent
+	firewall-cmd --remove-port=14000-15000/tcp
+	# add ports for ansible-install
+	firewall-cmd --add-port 7860/tcp --add-port 8060/tcp
+	firewall-cmd --reload
+fi
+
+# disable this systemd unit that starts this script so it never runs again
+systemctl disable weka-firstboot.service
+
+# start cockpit - now enabled elsewhere
+#systemctl enable --now cockpit.socket
+
+# enable our service that runs on every boot - now enabled elsewhere
+#systemctl enable --now weka-everyboot.service
+
+MOTD_FILE=/etc/motd.d/01-weka
+
+# install motd
+echo $MOTD > $MOTD_FILE
+echo >> $MOTD_FILE
+echo "Version $VERSION" >> $MOTD_FILE
+echo >> $MOTD_FILE
+
+# generate ssh keys
+keygen() {
+	mkdir -p ~$1/.ssh
+	chmod 700 ~$1/.ssh
+	# pipe a yes to it so it won't hang asking if it's ok to overwrite existing keys (unlikely, but why not)
+	yes | ssh-keygen -f ~${1}/.ssh/${HOSTNAME}_${1}_id_rsa -C ${1}@{$HOSTNAME}
+}
+keygen root
+keygen weka
+
+logger WEKA Finished weka-firstboot

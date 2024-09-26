@@ -1,0 +1,59 @@
+#!/usr/bin/bash
+
+
+# weka-ahavi-config - configure avahi
+logger WEKA Starting weka-avahi-config
+
+#set -x
+source /etc/os-release
+
+if [ -f /.version ]; then
+	TYPE=wsa
+	ISO_VERSION=$(cat /.version)
+elif [ -f /.wms-version ]; then
+	TYPE=wms
+	ISO_VERSION=$(cat /.wms-version)
+else
+	echo "neither WSA or WMS, not configuring avahi"
+	exit
+fi
+
+
+TXT_RECORD="ISO_version=\"$ISO_VERSION\" WEKA_Linux_version=\"$VERSION_ID\""
+
+# get Service tag, etc.
+SERVICE_TAG=$(dmidecode -s system-serial-number)
+if [ "$SERVICE_TAG" == "Not Specified" ]; then
+	SERVICE_TAG="None"
+fi
+TXT_RECORD="$TXT_RECORD SerialNumber=\"$SERVICE_TAG\""
+
+BMC_IP=$(ipmitool lan print | grep "IP Address   " | cut -d: -f2)
+if [ "$BMC_IP" == "" ]; then
+	BMC_IP=Unknown
+fi
+TXT_RECORD="$TXT_RECORD BMC_IP=\"$BMC_IP\""
+
+if [ "$TYPE" == "wsa" ]; then
+	weka status 2>&1 > /dev/null
+	RETURN=$?
+	if [ $RETURN == 100 ]; then
+		WEKA_MODE="STEM"
+	elif [ $RETURN == 127 ]; then
+		WEKA_MODE="Not Installed"
+	else
+		WEKA_MODE="Clusterized"
+	fi
+	WEKA_VERSION=$(weka version | cut '-d ' -f2)
+	if [ "$WEKA_VERSION" == "" ]; then
+		WEKA_VERSION="None"
+	fi
+	TXT_RECORD="$TXT_RECORD WEKA_vers=\"$WEKA_VERSION\" WEKA_mode=\"$WEKA_MODE\""
+fi
+
+
+
+mkdir -p /etc/avahi/services
+sed "s/WEKATYPE/$TYPE/" /etc/avahi/avahi-boilerplate.service | sed "s/WEKATEXT/$TXT_RECORD/" > /etc/avahi/services/weka.service
+
+logger WEKA Finished weka-avahi-config

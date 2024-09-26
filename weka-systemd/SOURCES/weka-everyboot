@@ -1,0 +1,108 @@
+#!/usr/bin/bash
+
+#set -x
+
+# weka-everyboot - do things that need to be done every time the server boots
+logger WEKA Starting weka-everyboot
+
+VERSION="unknown"
+MOTD="Not a WMS or WSA"
+# if a WSA, there will be a /.version file (WMS has a /.wms-version file)
+if [ -f /.version ]; then
+	VERSION=$(cat /.version)
+	MOTD="Welcome to the Weka Software Appliance!"
+else
+	VERSION=$(cat /.wms-version)
+	MOTD="Welcome to the Weka Management Server!"
+fi
+
+### other weka installation items
+
+# configure firewall
+firewall-cmd --set-default-zone=public  2>&1 > /dev/null # other options are set in the kickstart
+
+if [ -f /.wms-version ]; then
+	firewall-cmd --add-port 3000/tcp --add-port 8151/tcp --add-port 8090/tcp --add-port 443/tcp --add-port 80/tcp --add-port 5353/udp --permanent
+	firewall-cmd --remove-port=14000-15000/tcp --permanent
+	# add ports for ansible-install
+	firewall-cmd --add-port 7860/tcp --add-port 8060/tcp --permanent
+	firewall-cmd --reload
+fi
+
+# install motd - just in case the version changed?
+echo $MOTD > /etc/motd
+echo >> /etc/motd
+echo "Version $VERSION" >> /etc/motd
+echo >> /etc/motd
+
+# configure Avahi to beacon our information
+
+# weka-ahavi-config - configure avahi
+source /etc/os-release
+
+if [ -f /.version ]; then
+	TYPE=wsa
+	ISO_VERSION=$(cat /.version)
+elif [ -f /.wms-version ]; then
+	TYPE=wms
+	ISO_VERSION=$(cat /.wms-version)
+else
+	echo "neither WSA or WMS, not configuring avahi"
+	exit 0
+fi
+
+TXT_PRE="<txt-record value-format=\"text\">"
+TXT_END="</txt-record>\n    "
+TXT_RECORD="${TXT_PRE}ISO_version=\"$ISO_VERSION\"${TXT_END}"
+TXT_RECORD="${TXT_RECORD}${TXT_PRE}WEKA_Linux_version=\"$VERSION_ID\"${TXT_END}"
+
+# get Service tag, etc.
+SERVICE_TAG=$(dmidecode -s system-serial-number)
+if [ "$SERVICE_TAG" == "Not Specified" ]; then
+	SERVICE_TAG="None"
+fi
+TXT_RECORD="$TXT_RECORD${TXT_PRE}SerialNumber=\"$SERVICE_TAG\"${TXT_END}"
+
+BMC_IP=$(ipmitool lan print | grep "IP Address   " | cut -d: -f2 | tr -d '[:space:]')
+if [ "$BMC_IP" == "" ]; then
+	BMC_IP=Unknown
+fi
+TXT_RECORD="$TXT_RECORD${TXT_PRE}BMC_IP=\"$BMC_IP\"${TXT_END}"
+
+echo TXT record before if is $TXT_RECORD
+
+if [ "$TYPE" == "wsa" ]; then
+	weka status > /dev/null 2>&1 
+	RETURN=$?
+	while [ $RETURN == 2 ]; do
+		echo "waiting for weka container(s) to start"
+		sleep 1
+		weka status #> /dev/null 2>&1 
+		RETURN=$?
+	done
+	if [ $RETURN == 100 ]; then
+		echo Setting STEM mode
+		WEKA_MODE='"STEM"'
+	elif [ $RETURN == 127 ]; then
+		echo WEKA not installed
+		WEKA_MODE='"Not Installed"'
+	else
+		echo WEKA is part of a cluster
+		echo Return code is $RETURN
+		WEKA_MODE='"Clusterized"'
+	fi
+	WEKA_VERSION=\"$(weka version | cut '-d ' -f2)\"
+	if [ "$WEKA_VERSION" == "" ]; then
+		WEKA_VERSION="None"
+	fi
+	TXT_RECORD="${TXT_RECORD}${TXT_PRE}WEKA_vers=${WEKA_VERSION}${TXT_END}"
+        TXT_RECORD="${TXT_RECORD}${TXT_PRE}WEKA_mode=${WEKA_MODE}${TXT_END}"
+	# fix it so we don't have many " chars...
+	TXT_RECORD=$(echo $TXT_RECORD | tr \" \' )
+	echo "TXT record is $TXT_RECORD"
+fi
+
+mkdir -p /etc/avahi/services
+sed "s/WEKATYPE/$TYPE/" /etc/avahi/avahi-boilerplate.service | sed "s+WEKATEXT+$TXT_RECORD+" > /etc/avahi/services/weka.service
+
+logger WEKA Finishing weka-everyboot

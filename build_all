@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+rpmbuild-here()
+{
+rpmbuild --define "_topdir $PWD" $*
+}
+for i in weka*; do cd $i; rpmbuild-here -bb SPECS/*; rpmbuild-here -bs SPECS/*; cd ..; done

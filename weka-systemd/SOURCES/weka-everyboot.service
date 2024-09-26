@@ -1,0 +1,15 @@
+[Unit]
+Description="Weka Everyboot"
+After=network-online.target cockpit.service weka-firstboot.service
+Wants=network-online.target
+Before=console-getty.service multi-user.target avahi-daemon.service
+
+[Service]
+User=root
+#WorkingDirectory=/opt/wekabits
+ExecStart=/usr/bin/weka-everyboot
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=console-getty.service

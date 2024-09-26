@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+
+<!-- See avahi.service(5) for more information about this configuration file -->
+
+<service-group>
+
+  <name replace-wildcards="yes">WEKATYPE-%h</name>
+
+  <service>
+    <type>_weka._tcp</type>
+    <subtype>_WEKATYPE._sub._weka._tcp</subtype>
+    <port>14000</port>
+    WEKATEXT
+  </service>
+
+</service-group>

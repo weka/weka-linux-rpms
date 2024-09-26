@@ -1,0 +1,15 @@
+[Unit]
+Description="Weka Firstboot"
+After=network-online.target cockpit.service
+Wants=network-online.target
+Before=console-getty.service multi-user.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/wekabits
+ExecStart=/usr/bin/weka-firstboot
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=console-getty.service
