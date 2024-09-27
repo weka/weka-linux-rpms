@@ -18,7 +18,7 @@ Source302:	dnsmasq.conf
 
 Source401:	99-weka.conf
 
-Requires:	weka-rocky-release
+Requires:	weka-release
 Requires:       weka-cockpit-branding
 Requires:       weka-systemd
 Requires:	NetworkManager
@@ -28,7 +28,7 @@ Requires:	NetworkManager
 
 
 %description
-Weka Rocky Linux WSA scripts
+Weka Linux WSA scripts
 
 %build
 echo Good
@@ -58,9 +58,12 @@ install -m 0644 %{SOURCE401} %{buildroot}%{_sysconfdir}/sysctl.d/
 %config(noreplace) %{workdir}/wekaips.csv
 
 %{_sysconfdir}/modprobe.d/*
+%{_sysconfdir}/sysctl.d/*
 
 %{netmandir}/conf.d/*
 %{netmandir}/dnsmasq.d/*
+
+
 
 %changelog
 * Sat Aug 31 2024 Vince Fleming <vince@weka.io>
