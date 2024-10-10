@@ -29,11 +29,12 @@ if [ -f /.wms-version ]; then
 	firewall-cmd --reload
 fi
 
-# install motd - just in case the version changed?
-echo $MOTD > /etc/motd
-echo >> /etc/motd
-echo "Version $VERSION" >> /etc/motd
-echo >> /etc/motd
+# install motd
+MOTD_FILE=/etc/motd.d/01-weka
+echo $MOTD > $MOTD_FILE
+echo >> $MOTD_FILE
+echo "Version $VERSION" >> $MOTD_FILE
+echo >> $MOTD_FILE
 
 # configure Avahi to beacon our information
 
@@ -75,10 +76,17 @@ if [ "$TYPE" == "wsa" ]; then
 	weka status > /dev/null 2>&1 
 	RETURN=$?
 	while [ $RETURN == 2 ]; do
-		echo "waiting for weka container(s) to start"
-		sleep 1
-		weka status #> /dev/null 2>&1 
+		echo "waiting for WEKA container(s) to start"
+		sleep 10
+		weka version > /dev/null 2>&1
 		RETURN=$?
+		if [ $RETURN == 8 ]; then	# no version set - big trouble
+			logger 'ERROR - no WEKA version set - check for error messages'
+			# fall through so we're not waiting here forever
+		else
+			weka status > /dev/null 2>&1 
+			RETURN=$?
+		fi
 	done
 	if [ $RETURN == 100 ]; then
 		echo Setting STEM mode
@@ -86,12 +94,16 @@ if [ "$TYPE" == "wsa" ]; then
 	elif [ $RETURN == 127 ]; then
 		echo WEKA not installed
 		WEKA_MODE='"Not Installed"'
+	elif [ $RETURN == 8 ]; then
+		echo ERROR installing WEKA
+		echo Return code is $RETURN
+		WEKA_MODE='"ERROR"'
 	else
 		echo WEKA is part of a cluster
 		echo Return code is $RETURN
 		WEKA_MODE='"Clusterized"'
 	fi
-	WEKA_VERSION=\"$(weka version | cut '-d ' -f2)\"
+	WEKA_VERSION=$(weka version | cut '-d ' -f2)
 	if [ "$WEKA_VERSION" == "" ]; then
 		WEKA_VERSION="None"
 	fi

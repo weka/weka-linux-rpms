@@ -18,7 +18,7 @@
 # Distribution Name and Version
 %define distro_name  Weka Linux
 %define distro       %{distro_name}
-%define distro_code  Green Obsidian
+%define distro_code  Fledgeling
 %define major        8
 %define minor        10
 %define rocky_rel    1%{?rllh:.%{rllh}}%{!?rllh:.9}
@@ -315,6 +315,7 @@ EOF
 # Data directory
 install -d -m 0755 %{buildroot}%{_datadir}/weka-release
 ln -s weka-release %{buildroot}%{_datadir}/redhat-release
+ln -s weka-release %{buildroot}%{_datadir}/rocky-release
 install -p -m 0644 %{SOURCE200} %{buildroot}%{_datadir}/weka-release/
 
 # end system-release data

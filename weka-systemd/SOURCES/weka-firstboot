@@ -41,14 +41,6 @@ systemctl disable weka-firstboot.service
 # enable our service that runs on every boot - now enabled elsewhere
 #systemctl enable --now weka-everyboot.service
 
-MOTD_FILE=/etc/motd.d/01-weka
-
-# install motd
-echo $MOTD > $MOTD_FILE
-echo >> $MOTD_FILE
-echo "Version $VERSION" >> $MOTD_FILE
-echo >> $MOTD_FILE
-
 # generate ssh keys
 keygen() {
 	mkdir -p ~$1/.ssh
