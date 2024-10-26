@@ -25,11 +25,14 @@ rm -rf $RPM_BUILD_ROOT
 
 install -d -m 0755 %{buildroot}%{_datadir}/cockpit/branding/weka/
 tar xvf %{SOURCE0} -C %{buildroot}%{_datadir}/cockpit/branding/weka/
+install -d -m 0755 %{buildroot}%{_datadir}/cockpit/branding/rocky/
+tar xvf %{SOURCE0} -C %{buildroot}%{_datadir}/cockpit/branding/rocky/
 
 find %{buildroot}
 
 %files
 %{_datadir}/cockpit/branding/weka/*
+%{_datadir}/cockpit/branding/rocky/*
 
 %changelog
 * Tue Aug 27 2024 Vince Fleming <vince@weka.io>

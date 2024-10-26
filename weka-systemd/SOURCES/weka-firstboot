@@ -42,13 +42,13 @@ systemctl disable weka-firstboot.service
 #systemctl enable --now weka-everyboot.service
 
 # generate ssh keys
-keygen() {
-	mkdir -p ~$1/.ssh
-	chmod 700 ~$1/.ssh
-	# pipe a yes to it so it won't hang asking if it's ok to overwrite existing keys (unlikely, but why not)
-	yes | ssh-keygen -f ~${1}/.ssh/${HOSTNAME}_${1}_id_rsa -C ${1}@{$HOSTNAME}
-}
-keygen root
-keygen weka
+mkdir -p /root/.ssh
+chmod 700 /root/.ssh
+ssh-keygen -f /root/.ssh/${HOSTNAME}_root_id_rsa -C root@{$HOSTNAME} -q -N ''
+
+mkdir -p /home/weka/.ssh
+chmod 700 /home/weka/.ssh
+ssh-keygen -f /home/weka/.ssh/${HOSTNAME}_weka_id_rsa -C weka@{$HOSTNAME} -q -N ''
+chown -R weka:weka /home/.ssh
 
 logger WEKA Finished weka-firstboot

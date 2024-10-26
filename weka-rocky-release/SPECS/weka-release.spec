@@ -32,7 +32,7 @@
 
 %define contentdir   pub/weka
 %define sigcontent   pub/sig
-%define rlosid       weka
+%define rlosid       rocky
 
 %define os_bug_name  Weka-Linux-%{major}
 

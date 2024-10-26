@@ -28,10 +28,41 @@ if [ "$SERVICE_TAG" == "Not Specified" ]; then
 fi
 TXT_RECORD="$TXT_RECORD SerialNumber=\"$SERVICE_TAG\""
 
-BMC_IP=$(ipmitool lan print | grep "IP Address   " | cut -d: -f2)
-if [ "$BMC_IP" == "" ]; then
-	BMC_IP=Unknown
+BMC_IPv4=$(ipmitool lan print | grep "IP Address   " | cut -d: -f2 | tr -d '[:space:]')
+if [ "$BMC_IPv4" == "" ]; then
+	BMC_IPv4='None'
 fi
+
+RACADM=/opt/dell/srvadmin/sbin/racadm
+if [ -x $RACADM ]; then
+	NO_IPV6="::"
+	# if it works, we're on a Dell or WEKApod
+	$RACADM get idrac.CurrentIPv6 2>&1 > /dev/null
+	if [ $? == 0 ]; then
+		# we're on a Dell or WEKApod - take some notes
+		eval $($RACADM get idrac.CurrentIPv6.Address1 | grep '^A')
+		if [ "$Address1" != "$NO_IPV6" ] ; then
+			BMC_IPv6=$Address1
+		else
+			BMC_IPv6='None'
+		fi
+		eval $($RACADM get idrac.CurrentIPv6.LinkLocalAddress | grep '^L')
+		if [ "$LinkLocalAddress" != "$NO_IPV6" ] ; then
+			BMC_IPv6_LL=$LinkLocalAddress
+		else
+			BMC_IPv6_LL='None'
+		fi
+
+	fi
+fi
+
+if [ -z ${BMC_IPv6+x} ]; then
+	# check if BMC_IPv6 is set - if not, either racadm not installed/working or we're not on a Dell/WEKApod - it should be set to *something*
+	BMC_IP="[$BMC_IPv4]"
+else
+	BMC_IP="[$BMC_IPv4, $BMC_IPv6, $BMC_IPv6_LL]"
+fi
+
 TXT_RECORD="$TXT_RECORD BMC_IP=\"$BMC_IP\""
 
 if [ "$TYPE" == "wsa" ]; then
