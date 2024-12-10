@@ -13,6 +13,12 @@ if [ -f /.version ]; then
 	VERSION=$(cat /.version)
 	MOTD="Welcome to the Weka Software Appliance!"
 	TYPE=wsa
+	if [ -d /opt/MLNX* ]; then
+		pushd /opt/MLNX*
+		yes | ./mlnxofedinstall
+		modprobe -r rpcrdma ib_srpt ib_isert rdma_cm
+		/etc/init.d/openibd restart
+	fi
 else
 	VERSION=$(cat /.wms-version)
 	MOTD="Welcome to the Weka Management Server!"
@@ -26,29 +32,67 @@ firewall-cmd --set-default-zone=public  # other options are set in the kickstart
 
 if [ "$TYPE" == "wms" ]; then
 	firewall-cmd --add-port 3000/tcp --add-port 8151/tcp --add-port 8090/tcp --add-port 443/tcp --add-port 80/tcp --permanent
-	firewall-cmd --remove-port=14000-15000/tcp
+	#firewall-cmd --remove-port=14000-15000/tcp   # allow so WMS can port-forward 14000 to the cluster
 	# add ports for ansible-install
-	firewall-cmd --add-port 7860/tcp --add-port 8060/tcp
+	firewall-cmd --add-port 7860/tcp --add-port 8060/tcp --permanent
 	firewall-cmd --reload
 fi
 
-# disable this systemd unit that starts this script so it never runs again
+# disable the systemd unit that starts this script so it never runs again
 systemctl disable weka-firstboot.service
-
-# start cockpit - now enabled elsewhere
-#systemctl enable --now cockpit.socket
-
-# enable our service that runs on every boot - now enabled elsewhere
-#systemctl enable --now weka-everyboot.service
 
 # generate ssh keys
 mkdir -p /root/.ssh
 chmod 700 /root/.ssh
-ssh-keygen -f /root/.ssh/${HOSTNAME}_root_id_rsa -C root@{$HOSTNAME} -q -N ''
+ssh-keygen -f /root/.ssh/${HOSTNAME}_root_id_rsa -C root@${HOSTNAME} -q -N ''
 
 mkdir -p /home/weka/.ssh
 chmod 700 /home/weka/.ssh
-ssh-keygen -f /home/weka/.ssh/${HOSTNAME}_weka_id_rsa -C weka@{$HOSTNAME} -q -N ''
-chown -R weka:weka /home/.ssh
+ssh-keygen -f /home/weka/.ssh/${HOSTNAME}_weka_id_rsa -C weka@${HOSTNAME} -q -N ''
+chown -R weka:weka /home/weka/.ssh
+
+RACADM=/opt/dell/srvadmin/sbin/racadm
+
+# see if we need to enable IPv6 Autoconfiguration
+if [ -x $RACADM ]; then
+	logger "WEKA weka-everyboot checking for BMC IPv6 Autoconfig"
+        NO_IPV6="::"
+        # if it works, we're on a Dell or WEKApod
+        $RACADM get idrac.CurrentIPv6 2>&1 > /dev/null
+        if [ $? == 0 ]; then
+                # we're on a Dell or WEKApod - take some notes
+                eval $($RACADM get idrac.IPv6.Enable | grep '^E')
+                if [ "$Enable" == "Disabled" ] ; then
+                        # enable ipv6
+			logger "WEKA weka-firstboot Enabling BMC IPv6"
+                        $RACADM set idrac.IPv6.Enable Enabled
+			CHANGED=True
+			sleep 60   # have to give it time to enable and DHCP
+		else
+			logger "WEKA weka-firstboot IPv6 was Enabled"
+		fi
+
+		# check if we have an IPv6 address (static or DHCP)
+		eval $($RACADM get idrac.CurrentIPv6.Address1 | grep '^A')
+		if [ "$Address1" == "$NO_IPV6" ] ; then
+			logger "WEKA weka-firstboot IPv6 not static or DHCP... ensuring autoconfigure"
+			eval $($RACADM get idrac.CurrentIPv6.LinkLocalAddress | grep '^L')
+			if [ "$LinkLocalAddress" != "$NO_IPV6" ] ; then
+				# autoconfig might not be enabled...
+				eval $($RACADM get idrac.IPv6.AutoConfig | grep '^A')
+
+				if [ "$AutoConfig" == "Disabled" ] ; then
+					# enable autoconfig
+					logger "WEKA weka-firstboot Enabling BMC IPv6 Autoconfig"
+					$RACADM set idrac.CurrentIPv6.AutoConfig Enabled
+					CHANGED=True
+					sleep 60   # have to give it time to enable and autoconfigure
+				else
+					logger "WEKA weka-firstboot IPv6 AutoConfig was Enabled"
+				fi
+			fi
+                fi
+        fi
+fi
 
 logger WEKA Finished weka-firstboot

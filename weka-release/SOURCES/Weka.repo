@@ -4,7 +4,7 @@
 
 [weka]
 name=WEKA repo
-baseurl=https://weka-repo.s3.amazonaws.com/WekaLinux-8.10/Weka
+baseurl=https://weka-repo.s3.amazonaws.com/Weka-8.10/Weka
 gpgcheck=0
 enabled=1
 countme=1

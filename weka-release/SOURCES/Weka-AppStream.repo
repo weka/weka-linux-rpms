@@ -11,7 +11,7 @@
 [appstream]
 name=Weka Linux $releasever - AppStream
 #mirrorlist=https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=AppStream-$releasever
-baseurl=https://weka-repo.s3.amazonaws.com/WekaLinux-8.10/AppStream
+baseurl=https://weka-repo.s3.amazonaws.com/Weka-8.10/AppStream
 gpgcheck=1
 enabled=1
 countme=1

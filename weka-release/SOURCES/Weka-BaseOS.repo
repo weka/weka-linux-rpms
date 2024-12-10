@@ -11,7 +11,7 @@
 [baseos]
 name=Weka Linux $releasever - BaseOS
 #mirrorlist=https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=BaseOS-$releasever
-baseurl=https://weka-repo.s3.amazonaws.com/WekaLinux-8.10/BaseOS
+baseurl=https://weka-repo.s3.amazonaws.com/Weka-8.10/BaseOS
 gpgcheck=1
 enabled=1
 countme=1

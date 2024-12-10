@@ -1,2 +1,4 @@
 scp $(find . -name w\*.rpm) root@172.29.0.62:/space/Rocky8.10-vers/WekaRocky-8.10/Weka/Packages/w
 scp $(find . -name r\*.rpm) root@172.29.0.62:/space/Rocky8.10-vers/WekaRocky-8.10/Weka/Packages/r
+scp $(find . -name l\*.rpm) root@172.29.0.62:/space/Rocky8.10-vers/WekaRocky-8.10/Weka/Packages/l
+scp $(find . -name a\*.rpm) root@172.29.0.62:/space/Rocky8.10-vers/WekaRocky-8.10/Weka/Packages/a

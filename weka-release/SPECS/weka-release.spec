@@ -16,7 +16,7 @@
 %define variant_lowercase server
 
 # Distribution Name and Version
-%define distro_name  Weka Rocky Linux
+%define distro_name  Weka Linux
 %define distro       %{distro_name}
 %define distro_code  Fledgeling
 %define major        8
@@ -151,7 +151,7 @@ Source1201:     Weka-AppStream.repo
 Source1202:     Rocky-PowerTools.repo
 Source1203:     Rocky-Extras.repo
 Source1204:     Weka.repo
-Source1205:     Ofed.repo
+#Source1205:     Ofed.repo
 
 # Rocky Add-ons
 Source1210:     Rocky-HighAvailability.repo
@@ -198,7 +198,7 @@ Provides:       system-repos = %{version}-%{release}
 Provides:       rocky-repos(%{major}) = %{full_release_version}
 Provides:       weka-repos(%{major}) = %{full_release_version}
 Requires:       system-release = %{version}-%{release}
-Requires:       rocky-gpg-keys%{?rltype}
+Requires:       weka-gpg-keys%{?rltype}
 Conflicts:      %{name} < 8.0
 #Conflicts:      rocky-repos
 Obsoletes:      rocky-repos
@@ -208,19 +208,20 @@ Obsoletes:	ciq-lts86-rocky-repos
 %description   -n weka-repos%{?rltype}
 This package provide repo definitions for WEKA Linux 8.10
 
-%package     -n rocky-gpg-keys%{?rltype}
+%package     -n weka-gpg-keys%{?rltype}
 Summary:        Rocky RPM GPG Keys
 Conflicts:      %{name} < 8.0
+Provides:	rocky-gpg-keys%{?rltype}
 
-%description -n rocky-gpg-keys%{?rltype}
+%description -n weka-gpg-keys%{?rltype}
 This package provides the RPM signature keys for Rocky.
 
-%package     -n rocky-sb-certs%{?rltype}
+%package     -n weka-sb-certs%{?rltype}
 Summary:        %{distro_name} public secureboot certificates
 Group:          System Environment/Base
 Provides:       system-sb-certs = %{version}-%{release}
 
-%description -n rocky-sb-certs%{?rltype}
+%description -n weka-sb-certs%{?rltype}
 This package contains the %{distro_name} secureboot public certificates.
 
 %prep
@@ -398,7 +399,7 @@ install -p -m 0644 %{SOURCE1201} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1202} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1203} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1204} %{buildroot}%{_sysconfdir}/yum.repos.d/
-install -p -m 0644 %{SOURCE1205} %{buildroot}%{_sysconfdir}/yum.repos.d/
+#install -p -m 0644 %{SOURCE1205} %{buildroot}%{_sysconfdir}/yum.repos.d/
 
 install -p -m 0644 %{SOURCE1210} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1211} %{buildroot}%{_sysconfdir}/yum.repos.d/
@@ -462,10 +463,10 @@ ln -sr %{buildroot}%{_sysconfdir}/pki/rpm-gpg/RPM-GPG-KEY-rockytesting \
 %config(noreplace) %{_sysconfdir}/dnf/vars/rltype
 %config(noreplace) %{_sysconfdir}/dnf/vars/stream
 
-%files -n rocky-gpg-keys%{?rltype}
+%files -n weka-gpg-keys%{?rltype}
 %{_sysconfdir}/pki/rpm-gpg/
 
-%files -n rocky-sb-certs%{?rltype}
+%files -n weka-sb-certs%{?rltype}
 # care: resetting symlinks is intended
 %dir %{_sysconfdir}/pki/sb-certs
 %dir %{_datadir}/pki/sb-certs

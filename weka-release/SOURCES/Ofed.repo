@@ -4,7 +4,7 @@
 
 [ofed]
 name=Ofed repo
-baseurl=https://weka-repo.s3.amazonaws.com/WekaLinux-8.10/ofed
+baseurl=https://weka-repo.s3.amazonaws.com/Weka-8.10/weka_ofed
 gpgcheck=0
 enabled=1
 countme=1
