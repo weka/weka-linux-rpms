@@ -1,7 +1,7 @@
 Summary:              Graphical system installer
 Name:                 anaconda
 Version:              33.16.10.5
-Release:              1%{?dist}.weka.0.2
+Release:              50%{?dist}.weka.0.2
 License:              GPLv2+ and MIT
 URL:                  http://fedoraproject.org/wiki/Anaconda
 
@@ -14,6 +14,7 @@ Source0:              %{name}-%{version}.tar.bz2
 
 Patch1:               0001-Create-specific-weka-branding-patches.patch
 Patch2:               0004-weka-anaconda-po.patch
+Patch3:               0005-weka-color-progressbar.patch
 
 # Versions of required components (done so we make sure the buildrequires
 # match the requires versions of things).

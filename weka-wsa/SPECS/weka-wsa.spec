@@ -19,8 +19,8 @@ Source302:	dnsmasq.conf
 Source401:	99-weka.conf
 
 Requires:	weka-release
-Requires:       weka-cockpit-branding
-Requires:       weka-systemd
+Requires:	weka-cockpit-branding
+Requires:	weka-systemd
 Requires:	NetworkManager
 
 %define workdir	/opt/wekabits
@@ -37,12 +37,12 @@ echo Good
 rm -rf $RPM_BUILD_ROOT
 
 install -d -m 0755 %{buildroot}%{workdir}/
-install -m 0644 %{SOURCE101} %{buildroot}%{workdir}/
+install -m 0755 %{SOURCE101} %{buildroot}%{workdir}/
 install -m 0644 %{SOURCE102} %{buildroot}%{workdir}/
 install -m 0644 %{SOURCE103} %{buildroot}%{workdir}/
 
 install -d -m 0755 %{buildroot}%{_sysconfdir}/modprobe.d
-install -m 0644 %{SOURCE101} %{buildroot}%{_sysconfdir}/modprobe.d
+install -m 0644 %{SOURCE201} %{buildroot}%{_sysconfdir}/modprobe.d
 
 install -d -m 0755 %{buildroot}%{netmandir}/conf.d
 install -d -m 0755 %{buildroot}%{netmandir}/dnsmasq.d

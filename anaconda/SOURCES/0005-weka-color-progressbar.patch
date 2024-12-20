@@ -1,0 +1,15 @@
+diff -Naru a/data/anaconda-gtk.css b/data/anaconda-gtk.css
+--- a/data/anaconda-gtk.css	2024-03-05 04:56:19.000000000 -0500
++++ b/data/anaconda-gtk.css	2024-12-13 14:56:33.271076294 -0500
+@@ -46,6 +46,11 @@
+ @define-color error_fg_color black;
+ @define-color error_bg_color rgb (237, 54, 54);
+ 
++progressbar > trough > progress {
++  background-image: none;
++  background-color: rgb (119, 61, 190);
++}
++
+ infobar.info {
+     background-color: @info_bg_color;
+     border-color: darker(@info_bg_color);

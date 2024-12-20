@@ -103,7 +103,7 @@ index 0000000..55ba233
 +    org.fedoraproject.Anaconda.Modules.Services
 +
 +[Bootloader]
-+efi_dir = weka
++efi_dir = rocky
 +
 +[User Interface]
 +help_directory = /usr/share/anaconda/help/weka

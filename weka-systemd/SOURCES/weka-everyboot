@@ -30,7 +30,11 @@ if [ -f /.wms-version ]; then
 fi
 
 # install motd
+SYS_MOTD=/etc/motd
 MOTD_FILE=/etc/motd.d/01-weka
+if [ -f $SYS_MOTD ]; then
+	rm -f $SYS_MOTD
+fi
 echo $MOTD > $MOTD_FILE
 echo >> $MOTD_FILE
 echo "Version $VERSION" >> $MOTD_FILE

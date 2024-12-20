@@ -151,7 +151,7 @@ Source1201:     Weka-AppStream.repo
 Source1202:     Rocky-PowerTools.repo
 Source1203:     Rocky-Extras.repo
 Source1204:     Weka.repo
-#Source1205:     Ofed.repo
+Source1205:     Ofed.repo
 
 # Rocky Add-ons
 Source1210:     Rocky-HighAvailability.repo
@@ -314,10 +314,10 @@ cat > %{buildroot}%{_rpmmacrodir}/macros.dist << EOF
 %%dist_debuginfod_url %{debug_url}
 EOF
 
-# Data directory
+# Data directory (/usr/share)
 install -d -m 0755 %{buildroot}%{_datadir}/weka-release
 ln -s weka-release %{buildroot}%{_datadir}/redhat-release
-ln -s weka-release %{buildroot}%{_datadir}/rocky-release
+#ln -s weka-release %{buildroot}%{_datadir}/rocky-release
 install -p -m 0644 %{SOURCE200} %{buildroot}%{_datadir}/weka-release/
 
 # end system-release data
@@ -399,7 +399,7 @@ install -p -m 0644 %{SOURCE1201} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1202} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1203} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1204} %{buildroot}%{_sysconfdir}/yum.repos.d/
-#install -p -m 0644 %{SOURCE1205} %{buildroot}%{_sysconfdir}/yum.repos.d/
+install -p -m 0644 %{SOURCE1205} %{buildroot}%{_sysconfdir}/yum.repos.d/
 
 install -p -m 0644 %{SOURCE1210} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1211} %{buildroot}%{_sysconfdir}/yum.repos.d/
@@ -447,7 +447,7 @@ ln -sr %{buildroot}%{_sysconfdir}/pki/rpm-gpg/RPM-GPG-KEY-rockytesting \
 %config(noreplace) %{_sysconfdir}/issue.net
 %{_rpmmacrodir}/macros.dist
 %{_datadir}/redhat-release
-%{_datadir}/rocky-release
+#%{_datadir}/rocky-release
 %{_datadir}/weka-release
 %{_prefix}/lib/os-release
 %{_prefix}/lib/systemd/system-preset/*

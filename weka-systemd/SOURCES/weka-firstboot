@@ -38,9 +38,6 @@ if [ "$TYPE" == "wms" ]; then
 	firewall-cmd --reload
 fi
 
-# disable the systemd unit that starts this script so it never runs again
-systemctl disable weka-firstboot.service
-
 # generate ssh keys
 mkdir -p /root/.ssh
 chmod 700 /root/.ssh
@@ -94,5 +91,13 @@ if [ -x $RACADM ]; then
                 fi
         fi
 fi
+
+DCISM=$(ls /opt/wekabits/dcism* | head -1)
+if [ -f "$DCISM" ]; then
+	dnf install -y /opt/wekabits/dcism*
+fi
+
+# disable the systemd unit that starts this script so it never runs again
+systemctl disable weka-firstboot.service
 
 logger WEKA Finished weka-firstboot

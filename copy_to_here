@@ -1,0 +1,10 @@
+#!/usr/bin/bash
+#set -x
+
+for dir in w r l a; do
+	files=$(find . -name ${dir}\*.rpm)
+	for filename in $files; do
+		#echo $filename
+		cp $(find . -name ${dir}\*.rpm) /home/Weka-8.10/Weka/Packages/${dir}/
+	done
+done

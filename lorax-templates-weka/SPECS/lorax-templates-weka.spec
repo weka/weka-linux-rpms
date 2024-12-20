@@ -1,7 +1,7 @@
 Name:             lorax-templates-weka
 Version:          8.10
-Release:          3%{?dist}
-Summary:          Rocky Linux 8 build templates for lorax and livemedia-creator
+Release:          50%{?dist}
+Summary:          Weka Linux 8 build templates for lorax and livemedia-creator
 
 License:          GPLv2+
 URL:              https://github.com/weldr/lorax
@@ -11,13 +11,16 @@ Source0:          lorax-templates-weka-8.10.tgz
 # Required for the template branding support
 Requires:         lorax > 28.14.68
 Provides:         lorax-templates-weka = %{version}-%{release}
+Provides:         lorax-templates-rhel = %{version}-%{release}
+Provides:         lorax-templates-rocky = %{version}-%{release}
 Obsoletes:        lorax-templates-rhel < %{version}-%{release}
+Obsoletes:        lorax-templates-rocky < %{version}-%{release}
 
 # Where are these supposed to end up?
-%define templatedir %{_datadir}/lorax/templates.d/80-weka
+%define templatedir %{_datadir}/lorax/templates.d/70-weka
 
 %description
-EL-specific Lorax templates for creating the boot.iso and live isos are
+Weka-specific Lorax templates for creating the boot.iso and live isos are
 placed in %{templatedir}
 
 %prep
@@ -29,7 +32,7 @@ placed in %{templatedir}
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/%{templatedir}
-cp -a 80-weka/* $RPM_BUILD_ROOT/%{templatedir}
+cp -a 70-weka/* $RPM_BUILD_ROOT/%{templatedir}
 
 %files
 %dir %{templatedir}
