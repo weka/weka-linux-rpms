@@ -7,7 +7,7 @@ BuildArch:	noarch
 License:	GPL
 URL:		https://weka.io
 
-Source101:	hosts
+#Source101:	hosts
 
 Requires:	weka-release
 Requires:       weka-cockpit-branding
@@ -29,8 +29,8 @@ echo Good
 %install
 rm -rf $RPM_BUILD_ROOT
 
-install -d -m 0755 %{buildroot}%{_sysconfdir}
-install -m 0644 %{SOURCE101} %{buildroot}%{_sysconfdir}
+#install -d -m 0755 %{buildroot}%{_sysconfdir}
+#install -m 0644 %{SOURCE101} %{buildroot}%{_sysconfdir}
 
 #install -d -m 0755 %{buildroot}%{netmandir}/conf.d
 #install -d -m 0755 %{buildroot}%{netmandir}/dnsmasq.d
@@ -45,7 +45,7 @@ install -m 0644 %{SOURCE101} %{buildroot}%{_sysconfdir}
 #%config(noreplace) %{workdir}/wmsip.txt
 #%config(noreplace) %{workdir}/wekaips.csv
 
-%{_sysconfdir}/*
+#%{_sysconfdir}/*
 #%{_sysconfdir}/sysctl.d/*
 
 #%{netmandir}/conf.d/*

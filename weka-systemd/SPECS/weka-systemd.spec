@@ -8,7 +8,7 @@ License:	GPL
 URL:		https://weka.io
 
 Requires:	systemd
-Requires:	avahi
+#Recommends:	avahi
 Requires:	coreutils
 Requires:	sed
 
