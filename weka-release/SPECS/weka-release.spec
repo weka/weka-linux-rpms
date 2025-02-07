@@ -21,7 +21,7 @@
 %define distro_code  Fledgeling
 %define major        8
 %define minor        10
-%define rocky_rel    1%{?rllh:.%{rllh}}%{!?rllh:.9}
+%define rocky_rel    2%{?rllh:.%{rllh}}%{!?rllh:.9}
 %define upstream_rel %{major}.%{minor}-0.2
 %define rpm_license  BSD-3-Clause
 %define dist         .el%{major}
@@ -120,7 +120,7 @@ Provides:       centos-release-eula = %{version}-%{release}
 
 # What are our requirements?
 Requires:       weka-repos(%{major})
-Requires:	sed
+#Requires:	sed
 #Requires:       weka-cockpit-branding
 #Requires:       weka-systemd
 
@@ -151,7 +151,7 @@ Source1201:     Weka-AppStream.repo
 Source1202:     Rocky-PowerTools.repo
 Source1203:     Rocky-Extras.repo
 Source1204:     Weka.repo
-Source1205:     Ofed.repo
+#Source1205:     Ofed.repo     removed for no ofed
 
 # Rocky Add-ons
 Source1210:     Rocky-HighAvailability.repo
@@ -199,6 +199,8 @@ Provides:       rocky-repos(%{major}) = %{full_release_version}
 Provides:       weka-repos(%{major}) = %{full_release_version}
 Requires:       system-release = %{version}-%{release}
 Requires:       weka-gpg-keys%{?rltype}
+#Requires:	coreutils
+#Requires:	sed
 Conflicts:      %{name} < 8.0
 #Conflicts:      rocky-repos
 Obsoletes:      rocky-repos
@@ -207,6 +209,21 @@ Obsoletes:	ciq-lts86-rocky-repos
 
 %description   -n weka-repos%{?rltype}
 This package provide repo definitions for WEKA Linux 8.10
+
+# added this pre section to remove old Ofed repo and ciq (patch) repo, if they exist
+# These get removed when we obsolete ciq-lts86-rocky-repos!!!  No need to remove them!
+#%pre
+#if [ -f /etc/yum.repos.d/OFED58.repo ]; then
+#	rm -f /etc/yum.repos.d/OFED58.repo
+#fi
+#if [ -f /etc/yum.repos.d/ciq.repo ]; then
+#	rm -f /etc/yum.repos.d/ciq.repo
+#fi
+
+# move this stuff to a newer version of the 8.6 release RPM...
+## also, remove the exclude for kernel updates in /etc/dnf/dnf.conf
+#sed -i '/exclude=/d' /etc/dnf/dnf.conf
+#exit 0
 
 %package     -n weka-gpg-keys%{?rltype}
 Summary:        Rocky RPM GPG Keys
@@ -236,9 +253,10 @@ echo Good.
 %build
 echo Good.
 
-%post
+# move this stuff to a newer version of the 8.6 release RPM...
+#%post
 # remove the previous directive to exclude kernel updates 
-sed -i '/^exclude=/d' /etc/dnf/dnf.conf
+#sed -i '/^exclude=/d' /etc/dnf/dnf.conf
 
 %install
 # copy license and contributors doc here for %%license and %%doc macros
@@ -399,7 +417,7 @@ install -p -m 0644 %{SOURCE1201} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1202} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1203} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1204} %{buildroot}%{_sysconfdir}/yum.repos.d/
-install -p -m 0644 %{SOURCE1205} %{buildroot}%{_sysconfdir}/yum.repos.d/
+#install -p -m 0644 %{SOURCE1205} %{buildroot}%{_sysconfdir}/yum.repos.d/   removed for no ofed
 
 install -p -m 0644 %{SOURCE1210} %{buildroot}%{_sysconfdir}/yum.repos.d/
 install -p -m 0644 %{SOURCE1211} %{buildroot}%{_sysconfdir}/yum.repos.d/

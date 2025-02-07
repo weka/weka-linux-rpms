@@ -4,7 +4,7 @@
 SOURCES=$(wildcard SOURCES/*)
 SPECS=$(wildcard SPECS/*)
 
-TARG=weka-release/RPMS/noarch/weka-release-8.10-50.2.el8.noarch.rpm
+TARG=RPMS/x86_64/anaconda-33.16.10.5-50.el8.weka.0.2.x86_64.rpm
 
 ${TARG}: ${SPECS} ${SOURCES}
 	rpmbuild --define "_topdir ${CURDIR}" -ba $<

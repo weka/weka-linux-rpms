@@ -1,10 +1,10 @@
 #!/usr/bin/bash
 #set -x
 
-for dir in w r l a; do
-	files=$(find . -name ${dir}\*.rpm)
-	for filename in $files; do
-		#echo $filename
-		cp $(find . -name ${dir}\*.rpm) /home/Weka-8.10/Weka/Packages/${dir}/
-	done
+files=$(find . -name \*.rpm)
+for filename in $files; do
+	BASENAME=$(basename $filename)
+	echo Copying $filename to /home/Weka-8.10/Weka/Packages/${BASENAME:0:1}/
+	mkdir -p /home/Weka-8.10/Weka/Packages/${BASENAME:0:1}/
+	cp  $filename /home/Weka-8.10/Weka/Packages/${BASENAME:0:1}/
 done
