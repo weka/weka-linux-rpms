@@ -79,40 +79,6 @@ if [ "$BMC_IPv4" == "" ]; then
 	BMC_IPv4='None'
 fi
 
-# Make sure the IPv6 link-local address is autoconfigured
-#if [ -x $RACADM ]; then
-#	logger "WEKA weka-everyboot checking for BMC IPv6 Autoconfig"
-#        NO_IPV6="::"
-#        # if it works, we're on a Dell or WEKApod
-#        $RACADM get idrac.CurrentIPv6 2>&1 > /dev/null
-#        if [ $? == 0 ]; then
-#                # we're on a Dell or WEKApod - take some notes
-#                eval $($RACADM get idrac.IPv6.AutoConfig | grep '^A')
-#                eval $($RACADM get idrac.IPv6.Enable | grep '^E')
-#
-#                if [ "$AutoConfig" == "Disabled" ] ; then
-#                        # enable autoconfig
-#			logger "WEKA weka-everyboot Enabling BMC IPv6 Autoconfig"
-#                        $RACADM set idrac.CurrentIPv6.AutoConfig Enabled
-#			CHANGED=True
-#		else
-#			logger "WEKA weka-everyboot IPv6 AutoConfig was Enabled"
-#                fi
-#                if [ "$Enable" == "Disabled" ] ; then
-#                        # enable ipv6
-#			logger "WEKA weka-everyboot Enabling BMC IPv6"
-#                        $RACADM set idrac.IPv6.Enable Enabled
-#			CHANGED=True
-#		else
-#			logger "WEKA weka-everyboot IPv6 was Enabled"
-#                fi
-#		if [ ! -z ${CHANGED+x} ]; then
-#			logger "WEKA weka-everyboot Sleeping for IPv6 Autoconfig"
-#			sleep 60 # give it time to autoconfigure
-#		fi
-#        fi
-#fi
-
 RACADM=/opt/dell/srvadmin/sbin/racadm
 
 if [ -x $RACADM ]; then
@@ -145,11 +111,6 @@ fi
 
 BMC_IP="$BMC_IP]"
 
-
-#BMC_IP=$(ipmitool lan print | grep "IP Address   " | cut -d: -f2 | tr -d '[:space:]')
-#if [ "$BMC_IP" == "" ]; then
-#	BMC_IP=Unknown
-#fi
 
 TXT_RECORD="$TXT_RECORD${TXT_PRE}BMC_IP=\"$BMC_IP\"${TXT_END}"
 

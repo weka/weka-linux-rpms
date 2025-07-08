@@ -276,10 +276,11 @@ install -p -m 0644 %{SOURCE1300} %{buildroot}%{_mandir}/man1/
 
 # Create the os-release file
 install -d -m 0755 %{buildroot}%{_prefix}/lib
+#ID="%{rlosid}"
 cat > %{buildroot}%{_prefix}/lib/os-release << EOF
 NAME="%{distro_name}"
 VERSION="%{full_release_version} (%{distro_code})"
-ID="%{rlosid}"
+ID="rocky"
 ID_LIKE="rocky rhel centos fedora"
 VERSION_ID="%{full_release_version}"
 PLATFORM_ID="platform:el%{major}"

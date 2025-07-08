@@ -15,6 +15,7 @@ Recommends:       weka-wms-gui
 Recommends:       weka-ansible-install
 Recommends:       wekahome
 Recommends:       weka-tools
+Recommends:       weka-mon
 #Requires:	NetworkManager
 
 %description

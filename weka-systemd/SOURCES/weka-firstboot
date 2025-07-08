@@ -94,7 +94,7 @@ fi
 
 DCISM=$(ls /opt/wekabits/dcism* | head -1)
 if [ -f "$DCISM" ]; then
-	dnf install -y /opt/wekabits/dcism*
+	dnf --disablerepo=* -y install /opt/wekabits/dcism*
 fi
 
 # if it looks like we were installed via the weka os installer, notify the install server that we're up.
