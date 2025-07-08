@@ -1,6 +1,6 @@
 Name:		weka-systemd
 Version:	1.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	WEKA Linux Systemd Customizations
 BuildArch:	noarch
 
@@ -53,14 +53,14 @@ cp /etc/nsswitch.conf /etc/nsswitch.conf.last
 sed -i '/^hosts:/s/files dns myhostname/files mdns_minimal [NOTFOUND=return] dns myhostname/' /etc/nsswitch.conf
 
 %post
-%systemd_post weka-firstboot.service weka-everyboot.service weka-avahi-config.timer
+%systemd_post weka-firstboot.service weka-everyboot.service weka-avahi-config.timer weka-avahi-config.service
 
 %preun
-%systemd_preun weka-firstboot.service weka-everyboot.service weka-avahi-config.timer
+%systemd_preun weka-firstboot.service weka-everyboot.service weka-avahi-config.timer weka-avahi-config.service
 
 %postun
 %{?ldconfig}
-%systemd_postun_with_restart weka-firstboot.service weka-everyboot.service weka-avahi-config.timer
+%systemd_postun_with_restart weka-firstboot.service weka-everyboot.service weka-avahi-config.timer weka-avahi-config.service
 
 %files
 %{_unitdir}/*

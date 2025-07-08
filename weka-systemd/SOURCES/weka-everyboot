@@ -27,6 +27,9 @@ if [ -f /.wms-version ]; then
 	# add ports for ansible-install
 	firewall-cmd --add-port 7860/tcp --add-port 8060/tcp --permanent
 	firewall-cmd --reload
+else
+	firewall-cmd --add-port 3000/tcp --add-port 8151/tcp --add-port 8090/tcp --add-port 5353/udp --permanent
+	
 fi
 
 # install motd
@@ -152,10 +155,12 @@ TXT_RECORD="$TXT_RECORD${TXT_PRE}BMC_IP=\"$BMC_IP\"${TXT_END}"
 
 echo TXT record before if is $TXT_RECORD
 
+COUNT=0
 if [ "$TYPE" == "wsa" ]; then
 	weka status > /dev/null 2>&1 
 	RETURN=$?
-	while [ $RETURN == 2 ]; do
+	while [ $RETURN == 2 ] && [ $COUNT -lt 5 ]; do
+		COUNT=$((COUNT+1))
 		echo "waiting for WEKA container(s) to start"
 		sleep 10
 		weka version > /dev/null 2>&1
@@ -174,7 +179,7 @@ if [ "$TYPE" == "wsa" ]; then
 	elif [ $RETURN == 127 ]; then
 		echo WEKA not installed
 		WEKA_MODE='"Not Installed"'
-	elif [ $RETURN == 8 ]; then
+	elif [ $RETURN == 8 ] || [ $COUNT == 5 ]; then
 		echo ERROR installing WEKA
 		echo Return code is $RETURN
 		WEKA_MODE='"ERROR"'

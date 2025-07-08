@@ -112,9 +112,9 @@ if [ -x /usr/bin/weka ]; then
 	CANCEL="false"
 	if [ ${WEKA_MAJ} -lt "4" ]; then
 		CANCEL="true"
-	elif [ ${WEKA_MIN} -lt "3" ]; then
+	elif [ ${WEKA_MIN} -lt "4" ]; then
 		CANCEL="true"
-	elif [ ${WEKA_DOT} -lt "1" ]; then
+	elif [ ${WEKA_DOT} -lt "6" ]; then
 		CANCEL="true"
 	fi
 	if [ ${CANCEL} == "true" ]; then

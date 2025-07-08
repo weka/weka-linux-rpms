@@ -52,7 +52,7 @@ RACADM=/opt/dell/srvadmin/sbin/racadm
 
 # see if we need to enable IPv6 Autoconfiguration
 if [ -x $RACADM ]; then
-	logger "WEKA weka-everyboot checking for BMC IPv6 Autoconfig"
+	logger "WEKA weka-firstboot checking for BMC IPv6 Autoconfig"
         NO_IPV6="::"
         # if it works, we're on a Dell or WEKApod
         $RACADM get idrac.CurrentIPv6 2>&1 > /dev/null
@@ -95,6 +95,16 @@ fi
 DCISM=$(ls /opt/wekabits/dcism* | head -1)
 if [ -f "$DCISM" ]; then
 	dnf install -y /opt/wekabits/dcism*
+fi
+
+# if it looks like we were installed via the weka os installer, notify the install server that we're up.
+WEKA_INSTSALLER_F=/opt/wekabits/wmsip.txt
+if [ -f $WEKA_INSTALLER_F ]; then
+	INSTALL_SOURCE=$(cat /opt/wekabits/wmsip.txt)
+	ipmiip=$(ipmitool lan print | sed -n -r "s/IP Address\s*:\s*//p")
+	notifyurl="http://$INSTALL_SOURCE/notify?weka-firstboot-complete&_myIPMIip=$ipmiip"
+	 result=$(curl "$notifyurl")
+         echo "result from notify server $wmsip is  $result"
 fi
 
 # disable the systemd unit that starts this script so it never runs again

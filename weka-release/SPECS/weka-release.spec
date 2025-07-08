@@ -90,7 +90,7 @@
 
 Name:           weka-release%{?rltype}
 Version:        8.10
-Release:        50.2%{?dist}
+Release:        50.3%{?dist}
 Summary:        %{distro_name} release files
 Group:          System Environment/Base
 License:        %{rpm_license}

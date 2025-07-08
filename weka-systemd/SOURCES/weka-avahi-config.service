@@ -1,0 +1,11 @@
+[Unit]
+Description="Weka Avahi Config"
+After=network-online.target cockpit.service weka-firstboot.service avahi-daemon.service weka-everyboot.service
+Wants=network-online.target
+Before=console-getty.service multi-user.target
+JobRunningTimeoutSec=60s
+
+[Service]
+User=root
+ExecStart=/usr/bin/weka-avahi-config
+Type=oneshot

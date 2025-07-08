@@ -1,0 +1,12 @@
+# timer for weka-avahi-config.service
+[Unit]
+Description="Weka Avahi Config Cleanup Timer"
+Wants=network-online.target
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+Unit=weka-avahi-config.service
+
+[Install]
+WantedBy=timers.target
