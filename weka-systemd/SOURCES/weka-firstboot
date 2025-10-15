@@ -36,6 +36,10 @@ if [ "$TYPE" == "wms" ]; then
 	# add ports for ansible-install
 	firewall-cmd --add-port 7860/tcp --add-port 8060/tcp --permanent
 	firewall-cmd --reload
+	which podman > /dev/null
+	if [ $? == 0 ]; then
+		/usr/bin/systemctl enable --now podman
+	fi
 fi
 
 # generate ssh keys
