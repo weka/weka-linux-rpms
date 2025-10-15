@@ -1,6 +1,6 @@
 Name:		weka-wsa
 Version:	1.0
-Release:	3%{?dist}
+Release:	6%{?dist}
 Summary:	WEKA Linux WSA scripts
 BuildArch:	noarch
 
@@ -109,14 +109,28 @@ if [ -x /usr/bin/weka ]; then
 	WEKA_MAJ=$(echo ${WEKA_VERS} | cut '-d.' -f 1)
 	WEKA_MIN=$(echo ${WEKA_VERS} | cut '-d.' -f 2)
 	WEKA_DOT=$(echo ${WEKA_VERS} | cut '-d.' -f 3)
+        WEKA_DOT=${WEKA_DOT%%-*}	# for weird releases like 5.1.1-39ae3524133cb3e8
+
+	#CANCEL="false"
+	#if [ ${WEKA_MAJ} -lt "4" ]; then
+	#	CANCEL="true"
+	#elif [ ${WEKA_MIN} -lt "4" ]; then
+	#	CANCEL="true"
+	#elif [ ${WEKA_DOT} -lt "6" ]; then
+	#	CANCEL="true"
+	#fi
+
 	CANCEL="false"
 	if [ ${WEKA_MAJ} -lt "4" ]; then
 		CANCEL="true"
-	elif [ ${WEKA_MIN} -lt "4" ]; then
-		CANCEL="true"
+	elif [ ${WEKA_MAJ} -ge "5" ]; then
+		CANCEL="false"
+	elif [ ${WEKA_MIN} -gt "4" ]; then
+		CANCEL="false"
 	elif [ ${WEKA_DOT} -lt "6" ]; then
 		CANCEL="true"
 	fi
+
 	if [ ${CANCEL} == "true" ]; then
 		echo "******************************************"
 		echo
