@@ -1,0 +1,5 @@
+enable weka-everyboot.service
+enable weka-firstboot.service
+enable cockpit.socket
+enable node_exporter
+enable weka-avahi-config.timer

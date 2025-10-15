@@ -1,0 +1,10 @@
+# Ofed.repo
+# Our copy of Nvidia/Mellanox OFED repo
+#
+
+[ofed]
+name=Ofed repo
+baseurl=https://weka-repo.s3.amazonaws.com/Weka-8.10/ofed24
+gpgcheck=0
+enabled=1
+countme=1

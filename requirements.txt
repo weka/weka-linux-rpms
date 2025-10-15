@@ -1,0 +1,5 @@
+rpm-build
+rpmlint
+rpmdevtools
+rpm-libs
+

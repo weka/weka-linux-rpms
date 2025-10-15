@@ -1,0 +1,41 @@
+#!/usr/bin/bash
+
+#echo "Reconfiguring network interfaces"
+#echo
+#
+#get_nic_name() {
+#	weka local resources --container drives0 -J|jq .net_devices[$1].name | tr -d '"'
+#}
+#
+## start by looking at the nics defined in weka - make a list of them in use:
+#for INDEX in 0 1 2 3
+#do
+#	NICNAME=$(get_nic_name $INDEX)
+#	if [ NICNAME == "" ]; then
+#		break
+#	fi
+#	# only ETH interfaces change names
+#	if [ ${NICNAME:0:2} != "ib" ]; then
+#		NICS[$INDEX]=$NICNAME
+#		unset NICNAME
+#	fi
+#done
+
+SCRIPTDIR=/etc/sysconfig/network-scripts
+
+# now, for each nic, re-swizzle the network config
+#for NIC in $NICS
+#do
+#	echo NIC is $NIC - new is ${NIC::-3}
+#	sed '/DEVICE/s/np1//' $SCRIPTDIR/ifcfg-$NIC > $SCRIPTDIR/ifcfg-${NIC::-3}
+#done
+#
+#echo "Network reconfiguration complete"; echo
+
+echo "Removing OFED..."
+
+dnf clean all
+dnf -y remove openmpi
+dnf -y downgrade --allowerasing libfabric libibverbs perftest rdma-core
+
+echo "Done.   Please check for errors and reboot to activate"

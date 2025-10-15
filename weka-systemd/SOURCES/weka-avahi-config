@@ -1,10 +1,9 @@
 #!/usr/bin/bash
 
-
 # weka-ahavi-config - configure avahi
-logger WEKA Starting weka-avahi-config
 
-#set -x
+RACADM=/opt/dell/srvadmin/sbin/racadm
+
 source /etc/os-release
 
 if [ -f /.version ]; then
@@ -15,45 +14,179 @@ elif [ -f /.wms-version ]; then
 	ISO_VERSION=$(cat /.wms-version)
 else
 	echo "neither WSA or WMS, not configuring avahi"
-	exit
+	exit 0
 fi
 
-
-TXT_RECORD="ISO_version=\"$ISO_VERSION\" WEKA_Linux_version=\"$VERSION_ID\""
+TXT_PRE="<txt-record value-format=\"text\">"
+TXT_END="</txt-record>\n    "
+TXT_RECORD="${TXT_PRE}ISO_version=\"$ISO_VERSION\"${TXT_END}"
+TXT_RECORD="${TXT_RECORD}${TXT_PRE}WEKA_Linux_version=\"$VERSION_ID\"${TXT_END}"
 
 # get Service tag, etc.
 SERVICE_TAG=$(dmidecode -s system-serial-number)
 if [ "$SERVICE_TAG" == "Not Specified" ]; then
 	SERVICE_TAG="None"
 fi
-TXT_RECORD="$TXT_RECORD SerialNumber=\"$SERVICE_TAG\""
+TXT_RECORD="$TXT_RECORD${TXT_PRE}SerialNumber=\"$SERVICE_TAG\"${TXT_END}"
 
-BMC_IP=$(ipmitool lan print | grep "IP Address   " | cut -d: -f2)
-if [ "$BMC_IP" == "" ]; then
-	BMC_IP=Unknown
+#
+# See if we can figure out the BMC IP addresses - both IPv4 and IPv6 (and link-local IPv6)
+#
+BMC_IPv4=$(ipmitool lan print | grep "IP Address   " | cut -d: -f2 | tr -d '[:space:]')
+if [ "$BMC_IPv4" == "" ]; then
+	BMC_IPv4='None'
 fi
-TXT_RECORD="$TXT_RECORD BMC_IP=\"$BMC_IP\""
 
-if [ "$TYPE" == "wsa" ]; then
-	weka status 2>&1 > /dev/null
-	RETURN=$?
-	if [ $RETURN == 100 ]; then
-		WEKA_MODE="STEM"
-	elif [ $RETURN == 127 ]; then
-		WEKA_MODE="Not Installed"
+if [ -x $RACADM ]; then
+	NO_IPV6="::"
+	# if it works, we're on a Dell or WEKApod
+	$RACADM get idrac.CurrentIPv6 2>&1 > /dev/null
+	if [ $? == 0 ]; then
+		# we're on a Dell or WEKApod - take some notes
+		eval $($RACADM get idrac.CurrentIPv6.Address1 | grep '^A')
+		if [ "$Address1" != "$NO_IPV6" ] ; then
+			BMC_IPv6=$Address1
+		fi
+		eval $($RACADM get idrac.CurrentIPv6.LinkLocalAddress | grep '^L')
+		if [ "$LinkLocalAddress" != "$NO_IPV6" ] ; then
+			BMC_IPv6_LL=$LinkLocalAddress
+		fi
+
+	fi
+fi
+
+BMC_IP="[$BMC_IPv4"
+
+if [ ! -z ${BMC_IPv6+x} ]; then
+	# check if BMC_IPv6 is set - if not, either racadm not installed/working or we're not on a Dell/WEKApod - it should be set to *something*
+	BMC_IP="$BMC_IP,$BMC_IPv6"
+fi
+if [ ! -z ${BMC_IPv6_LL+x} ]; then
+	BMC_IP="$BMC_IP,$BMC_IPv6_LL"
+fi
+
+BMC_IP="$BMC_IP]"
+
+
+TXT_RECORD="$TXT_RECORD${TXT_PRE}BMC_IP=\"$BMC_IP\"${TXT_END}"
+
+# Get the weka version and status
+WEKA_FOUND="timed_out"
+for TRIES in {1..10}; do
+	echo "Listing containers"
+	WEKA_INFO=$(weka local ps -J)
+	if [ $? == 127 ]; then
+		# weka not found
+		echo weka not found?
+		WEKA_FOUND="false"
+		WEKA_MODE='"Not Installed"'
+		WEKA_VERSION='"Not Installed"'
+		break
+	fi
+	NUM_CONTAINERS=$(echo $WEKA_INFO | jq '. | length')
+
+	if [ $NUM_CONTAINERS -lt 1 ]; then
+		echo "waiting for WEKA container(s) to start"
+		sleep 10
 	else
-		WEKA_MODE="Clusterized"
+		echo "There are $NUM_CONTAINERS containers defined"
+		WEKA_FOUND="true"
+		break
 	fi
-	WEKA_VERSION=$(weka version | cut '-d ' -f2)
-	if [ "$WEKA_VERSION" == "" ]; then
+
+done
+
+case $WEKA_FOUND in
+	"true")
+		WEKA_STATUS=$(echo $WEKA_INFO | jq .[0].internalStatus.display_status | tr -d '"')
+		WEKA_RUN_STATUS=$(echo $WEKA_INFO | jq .[0].runStatus | tr -d '"')
+
+		case $WEKA_RUN_STATUS in 
+			Stopped)
+				echo Setting Stopped status
+				WEKA_MODE='"Stopped"'
+				;;
+			Running)
+
+				case $WEKA_STATUS in 
+					STEM)
+						echo Setting STEM mode
+						WEKA_MODE='"STEM"'
+						;;
+					READY)
+						echo Status is Ready... 
+						WEKA_MODE='"Clusterized"'
+						;;
+					Unknown)
+						echo Unknown status
+						WEKA_MODE='"Unknown"'
+						;;
+					*)
+						echo Unknown display_status: $WEKA_STATUS
+						WEKA_MODE='"Unknown display status"'
+						;;
+				esac
+
+				;;
+			*)
+				echo Unknown runStatus: $WEKA_RUN_STATUS
+				WEKA_MODE='"Unknown runStatus"'
+				;;
+		esac
+
+		WEKA_VERSION=$(echo $WEKA_INFO | jq .[0].versionName | tr -d '"')
+		echo WEKA_VERSION is $WEKA_VERSION
+
+		if [ "$WEKA_VERSION" == "" ]; then
+			WEKA_VERSION="None"
+		fi
+		;;
+	"false")
 		WEKA_VERSION="None"
-	fi
-	TXT_RECORD="$TXT_RECORD WEKA_vers=\"$WEKA_VERSION\" WEKA_mode=\"$WEKA_MODE\""
-fi
+		WEKA_MODE="Not Installed"
+		;;
+	"timed_out")
+		WEKA_MODE='"ERROR"'
+		WEKA_VERSION='"ERROR"'
+		;;
+	*)
+		echo "ERROR: Unable to determine WEKA Version and Mode"
+		WEKA_MODE='"SCRIPT ERROR"'
+		WEKA_VERSION='"SCRIPT ERROR"'
+		;;
+esac
 
+TXT_RECORD="${TXT_RECORD}${TXT_PRE}WEKA_vers=${WEKA_VERSION}${TXT_END}"
+TXT_RECORD="${TXT_RECORD}${TXT_PRE}WEKA_mode=${WEKA_MODE}${TXT_END}"
 
+# fix it so we don't have many " chars...
+TXT_RECORD=$(echo $TXT_RECORD | tr \" \' )
+echo "TXT record is $TXT_RECORD"
 
-mkdir -p /etc/avahi/services
-sed "s/WEKATYPE/$TYPE/" /etc/avahi/avahi-boilerplate.service | sed "s/WEKATEXT/$TXT_RECORD/" > /etc/avahi/services/weka.service
+AVAHI_DIR=/etc/avahi
+SERV_DIR=$AVAHI_DIR/services
+SERVICE_FILE=$SERV_DIR/weka.service
+mkdir -p $SERV_DIR
+TMPFILE=$(mktemp)
+sed "s/WEKATYPE/$TYPE/" $AVAHI_DIR/avahi-boilerplate.service | sed "s+WEKATEXT+$TXT_RECORD+" > $TMPFILE
+echo Checking for differences...
+diff $SERVICE_FILE $TMPFILE 2>&1 > /dev/null
+RET=$?
+case $RET in 
+	0)
+		echo No changes needed
+		;;
+	1|2)
+		echo Changes required
+		mv $TMPFILE $SERVICE_FILE
+		chmod +r $SERVICE_FILE
+		avahi-daemon --reload
+		;;
+	*)
+		echo Script error comparing new and old service files - $RET
+		;;
+esac
 
-logger WEKA Finished weka-avahi-config
+rm -f $TMPFILE
+
+logger WEKA Finishing weka-avahi-config
